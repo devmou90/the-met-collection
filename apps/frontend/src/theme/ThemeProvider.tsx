@@ -1,6 +1,11 @@
 import type { PropsWithChildren } from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { STORAGE_KEY, ThemeContext, type Theme, type ThemeContextValue } from './context';
+import {
+  STORAGE_KEY,
+  ThemeContext,
+  type Theme,
+  type ThemeContextValue
+} from './context';
 
 const getPreferredTheme = (): Theme => {
   if (typeof window === 'undefined') {
@@ -12,7 +17,7 @@ const getPreferredTheme = (): Theme => {
     return stored;
   }
 
-  return 'light'
+  return 'light';
 };
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
@@ -34,10 +39,13 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
     () => ({
       theme,
       setTheme,
-      toggleTheme: () => setTheme((current) => (current === 'dark' ? 'light' : 'dark')),
+      toggleTheme: () =>
+        setTheme(current => (current === 'dark' ? 'light' : 'dark'))
     }),
     [theme]
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 };
