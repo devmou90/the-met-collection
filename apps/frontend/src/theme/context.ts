@@ -10,4 +10,6 @@ export interface ThemeContextValue {
 
 export const STORAGE_KEY = 'art-explorer:theme';
 
-export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextValue | undefined>(
+  undefined
+);
