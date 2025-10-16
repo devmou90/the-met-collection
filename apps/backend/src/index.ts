@@ -17,10 +17,17 @@ app.get('/health', (_req, res) => {
 app.use('/api', artRouter);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('[server] unhandled error', error);
-  res.status(500).json({ error: 'Internal Server Error' });
-});
+app.use(
+  (
+    error: unknown,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction
+  ) => {
+    console.error('[server] unhandled error', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+);
 
 const port = Number(process.env.PORT) || 4000;
 

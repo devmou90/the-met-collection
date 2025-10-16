@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { metApi } from '../metClient';
+import { metApi } from '../clients/metClient';
 import { parseSearchParams, searchArtworks } from '../services/searchService';
 
 const router = Router();

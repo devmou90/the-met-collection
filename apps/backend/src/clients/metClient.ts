@@ -1,16 +1,20 @@
 import axios from 'axios';
-import { MET_API_BASE_URL, REQUEST_TIMEOUT_MS } from './config';
-import type { MetDepartmentResponse, MetObject, MetSearchResponse } from './types';
+import { MET_API_BASE_URL, REQUEST_TIMEOUT_MS } from '../config';
+import type {
+  MetDepartmentResponse,
+  MetObject,
+  MetSearchResponse
+} from '../types';
 
 const client = axios.create({
   baseURL: MET_API_BASE_URL,
-  timeout: REQUEST_TIMEOUT_MS,
+  timeout: REQUEST_TIMEOUT_MS
 });
 
 export const metApi = {
   async search(params: Record<string, string | number | boolean | undefined>) {
     const response = await client.get<MetSearchResponse>('/search', {
-      params,
+      params
     });
 
     return response.data;
@@ -26,5 +30,5 @@ export const metApi = {
     const response = await client.get<MetDepartmentResponse>('/departments');
 
     return response.data;
-  },
+  }
 };

@@ -17,3 +17,13 @@ export const REQUEST_TIMEOUT_MS = toPositiveNumber(
   process.env.MET_API_TIMEOUT_MS,
   10000
 );
+
+export const SEARCH_CACHE_TTL_MS = toPositiveNumber(
+  process.env.MET_SEARCH_CACHE_MS,
+  5 * 60 * 1000
+);
+
+export const OBJECT_CACHE_TTL_MS = toPositiveNumber(
+  process.env.MET_OBJECT_CACHE_MS,
+  10 * 60 * 1000
+);

@@ -1,6 +1,27 @@
-import { DEFAULT_PAGE_SIZE } from '../config';
-import { metApi } from '../metClient';
+import {
+  DEFAULT_PAGE_SIZE,
+  OBJECT_CACHE_TTL_MS,
+  SEARCH_CACHE_TTL_MS
+} from '../config';
+import { metApi } from '../clients/metClient';
+import { TTLCache } from '../lib/cache';
 import type { MetObject, SearchParams, SearchResult } from '../types';
+
+const searchCache = new TTLCache<string, SearchResult>(SEARCH_CACHE_TTL_MS);
+const objectCache = new TTLCache<number, MetObject>(OBJECT_CACHE_TTL_MS);
+
+const getSearchCacheKey = (params: SearchParams): string => {
+  const { query, page, perPage, hasImages, departmentId, artistOrCulture } =
+    params;
+  return JSON.stringify({
+    query,
+    page,
+    perPage,
+    hasImages,
+    departmentId,
+    artistOrCulture
+  });
+};
 
 const toNumber = (value: unknown): number | undefined => {
   if (value === undefined || value === null) {
@@ -40,7 +61,9 @@ const toBoolean = (value: unknown, fallback: boolean): boolean => {
   return fallback;
 };
 
-export const parseSearchParams = (query: Record<string, unknown>): SearchParams => {
+export const parseSearchParams = (
+  query: Record<string, unknown>
+): SearchParams => {
   const searchQuery = String(query.q ?? '').trim();
   const page = toPositiveNumber(query.page) ?? 1;
   const perPage = toPositiveNumber(query.perPage) ?? DEFAULT_PAGE_SIZE;
@@ -57,18 +80,28 @@ export const parseSearchParams = (query: Record<string, unknown>): SearchParams 
     perPage,
     hasImages,
     ...(departmentId !== undefined ? { departmentId } : {}),
-    ...(artistOrCulture !== undefined ? { artistOrCulture } : {}),
+    ...(artistOrCulture !== undefined ? { artistOrCulture } : {})
   };
 };
 
-export const searchArtworks = async (params: SearchParams): Promise<SearchResult> => {
-  const { query, hasImages, departmentId, artistOrCulture, page, perPage } = params;
+export const searchArtworks = async (
+  params: SearchParams
+): Promise<SearchResult> => {
+  const { query, hasImages, departmentId, artistOrCulture, page, perPage } =
+    params;
+
+  const cacheKey = getSearchCacheKey(params);
+  const cached = searchCache.get(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
 
   const searchResponse = await metApi.search({
     q: query,
     hasImages,
     ...(departmentId ? { departmentId } : {}),
-    ...(artistOrCulture ? { artistOrCulture } : {}),
+    ...(artistOrCulture ? { artistOrCulture } : {})
   });
 
   const allIds = searchResponse.objectIDs ?? [];
@@ -78,9 +111,16 @@ export const searchArtworks = async (params: SearchParams): Promise<SearchResult
   const paginatedIds = allIds.slice(startIndex, startIndex + perPage);
 
   const objects = await Promise.all(
-    paginatedIds.map(async (id): Promise<MetObject | null> => {
+    paginatedIds.map(async (id: number): Promise<MetObject | null> => {
       try {
-        return await metApi.getObject(id);
+        const cachedObject = objectCache.get(id);
+        if (cachedObject) {
+          return cachedObject;
+        }
+
+        const object = await metApi.getObject(id);
+        objectCache.set(id, object);
+        return object;
       } catch (error) {
         console.error(`[met] failed to fetch object ${id}`, error);
         return null;
@@ -89,15 +129,19 @@ export const searchArtworks = async (params: SearchParams): Promise<SearchResult
   );
 
   const filteredObjects = objects.filter(
-    (object): object is MetObject => object !== null
+    (object: MetObject | null): object is MetObject => object !== null
   );
 
-  return {
+  const result = {
     page,
     perPage,
     total,
     totalPages,
     objectIDs: paginatedIds,
-    objects: filteredObjects,
+    objects: filteredObjects
   };
+
+  searchCache.set(cacheKey, result);
+
+  return result;
 };
