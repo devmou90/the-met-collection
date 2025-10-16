@@ -45,7 +45,7 @@ export const GalleryGrid = ({ items, isLoading, error }: GalleryGridProps) => {
       {items.map(artwork => (
         <article
           key={artwork.objectID}
-          className="group h-full rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+          className="group flex h-full flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
         >
           <div className="relative aspect-[4/5] overflow-hidden rounded-t-xl bg-slate-100 dark:bg-slate-800">
             {artwork.primaryImageSmall ? (
@@ -60,34 +60,36 @@ export const GalleryGrid = ({ items, isLoading, error }: GalleryGridProps) => {
               </div>
             )}
           </div>
-          <div className="flex flex-col gap-3 p-4">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                {artwork.title || 'Untitled'}
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {artwork.artistDisplayName || 'Unknown artist'}
-              </p>
+          <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-3">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  {artwork.title || 'Untitled'}
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {artwork.artistDisplayName || 'Unknown artist'}
+                </p>
+              </div>
+              <dl className="grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <div>
+                  <dt className="font-medium uppercase tracking-wider text-slate-400">
+                    Department
+                  </dt>
+                  <dd>{artwork.department}</dd>
+                </div>
+                <div>
+                  <dt className="font-medium uppercase tracking-wider text-slate-400">
+                    Date
+                  </dt>
+                  <dd>{artwork.objectDate || 'N/A'}</dd>
+                </div>
+              </dl>
             </div>
-            <dl className="grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400">
-              <div>
-                <dt className="font-medium uppercase tracking-wider text-slate-400">
-                  Department
-                </dt>
-                <dd>{artwork.department}</dd>
-              </div>
-              <div>
-                <dt className="font-medium uppercase tracking-wider text-slate-400">
-                  Date
-                </dt>
-                <dd>{artwork.objectDate || 'N/A'}</dd>
-              </div>
-            </dl>
             <a
               href={artwork.objectURL}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-full border border-emerald-500 px-3 py-2 text-sm font-medium text-emerald-600 transition hover:bg-emerald-50 dark:border-emerald-400 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
+              className="mt-auto inline-flex items-center justify-center rounded-full border border-emerald-500 px-3 py-2 text-sm font-medium text-emerald-600 transition hover:bg-emerald-50 dark:border-emerald-400 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
             >
               View on The Met
             </a>
