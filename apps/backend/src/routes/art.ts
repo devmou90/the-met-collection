@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { metApi } from '../clients/metClient';
 import { parseSearchParams, searchArtworks } from '../services/searchService';
+import { getArtwork } from '../services/artworkService';
 
 const router = Router();
 
@@ -28,7 +29,7 @@ router.get('/objects/:id', async (req, res, next) => {
       return res.status(400).json({ error: 'Invalid object ID' });
     }
 
-    const object = await metApi.getObject(id);
+    const object = await getArtwork(id);
 
     res.json(object);
   } catch (error) {
