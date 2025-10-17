@@ -30,3 +30,6 @@ node_modules
 .env
 .env.local
 .env.*
+
+# Local Netlify folder
+.netlify
