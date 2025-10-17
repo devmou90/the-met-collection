@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Header } from './components/Header';
 import { SearchBar } from './components/SearchBar';
 import { GalleryGrid } from './components/GalleryGrid';
 import { useArtSearch } from './hooks/useArtSearch';
 import { EmptyState } from './components/EmptyState';
 import { getInitialQueryFromUrl, updateQueryParam } from './utils/urlSearch';
+import { useInfiniteScroll } from './hooks/useInfiniteScroll';
 
 const App = () => {
   const [query, setQuery] = useState(getInitialQueryFromUrl);
@@ -17,13 +18,26 @@ const App = () => {
     () => (query ? { q: query } : undefined),
     [query]
   );
-  const searchState = useArtSearch(searchParams);
+  const {
+    items: artworks,
+    total: totalFound,
+    isInitialLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    error
+  } = useArtSearch(searchParams);
 
-  const totalFound = searchState.data?.total ?? 0;
-  const artworks = useMemo(
-    () => searchState.data?.objects ?? [],
-    [searchState.data]
-  );
+  const handleLoadMore = useCallback(() => {
+    void fetchNextPage();
+  }, [fetchNextPage]);
+
+  const loadMoreRef = useInfiniteScroll({
+    enabled: Boolean(query) && hasNextPage && !isInitialLoading,
+    loading: isFetchingNextPage,
+    onLoadMore: handleLoadMore
+  });
 
   const handleSearch = (value: string) => {
     const trimmed = value.trim();
@@ -64,7 +78,9 @@ const App = () => {
                 </span>
                 <button
                   type="button"
-                  onClick={() => searchState.refetch()}
+                  onClick={() => {
+                    void refetch();
+                  }}
                   className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 font-medium text-slate-600 transition hover:border-emerald-400 hover:text-emerald-500 dark:border-slate-700 dark:text-slate-300 dark:hover:border-emerald-400"
                 >
                   Refresh
@@ -73,9 +89,21 @@ const App = () => {
 
               <GalleryGrid
                 items={artworks}
-                isLoading={searchState.isLoading}
-                error={searchState.error?.message ?? null}
+                isLoading={isInitialLoading}
+                error={error?.message ?? null}
               />
+
+              <div ref={loadMoreRef} className="h-12 w-full" />
+              {isFetchingNextPage ? (
+                <p className="text-center text-sm text-slate-400">
+                  Loading more…
+                </p>
+              ) : null}
+              {!hasNextPage && !isInitialLoading && artworks.length > 0 ? (
+                <p className="text-center text-xs uppercase tracking-wider text-slate-400">
+                  End of results
+                </p>
+              ) : null}
             </>
           ) : (
             <EmptyState

@@ -1,19 +1,23 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { searchArtworks, type SearchParams } from '../api/met';
-import type { SearchResponse } from '../types/api';
+import type { ArtworkDetail, SearchResponse } from '../types/api';
 
 interface UseArtSearchState {
-  data: SearchResponse | null;
-  isLoading: boolean;
+  items: ArtworkDetail[];
+  total: number;
+  totalPages: number;
+  isInitialLoading: boolean;
+  isFetchingNextPage: boolean;
   error: Error | null;
-  refetch: () => void;
+  hasNextPage: boolean;
+  fetchNextPage: () => Promise<unknown>;
+  refetch: () => Promise<unknown>;
 }
 
 const buildQueryKey = (params: SearchParams) => {
   return [
     'search',
     params.q,
-    params.page,
     params.perPage,
     params.hasImages,
     params.departmentId ?? null,
@@ -30,7 +34,6 @@ const createSearchParams = (
 
   return {
     q: params.q.trim(),
-    page: params.page ?? 1,
     perPage: params.perPage ?? 15,
     hasImages: params.hasImages ?? true,
     departmentId: params.departmentId,
@@ -52,23 +55,41 @@ export const useArtSearch = (
 ): UseArtSearchState => {
   const mergedParams = createSearchParams(params);
 
-  const query = useQuery<SearchResponse, Error>({
+  const query = useInfiniteQuery<SearchResponse, Error>({
     queryKey: mergedParams ? buildQueryKey(mergedParams) : ['search', 'empty'],
-    queryFn: ({ signal }) => {
+    queryFn: ({ pageParam = 1, signal }) => {
       if (!mergedParams) {
         return Promise.resolve(emptySearchResponse);
       }
 
-      return searchArtworks(mergedParams, signal);
+      return searchArtworks(
+        {
+          ...mergedParams,
+          page: pageParam as number
+        },
+        signal
+      );
     },
-    enabled: Boolean(mergedParams),
-    placeholderData: mergedParams ? keepPreviousData : undefined
+    getNextPageParam: lastPage =>
+      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
+    initialPageParam: 1,
+    enabled: Boolean(mergedParams)
   });
 
+  const pages = query.data?.pages ?? [];
+  const items = pages.flatMap(page => page.objects);
+  const total = pages[0]?.total ?? 0;
+  const totalPages = pages[0]?.totalPages ?? 0;
+
   return {
-    data: (query.data as SearchResponse | undefined) ?? null,
-    isLoading: query.isLoading,
+    items,
+    total,
+    totalPages,
+    isInitialLoading: query.isLoading,
+    isFetchingNextPage: query.isFetchingNextPage,
     error: query.error ?? null,
+    hasNextPage: Boolean(query.hasNextPage),
+    fetchNextPage: query.fetchNextPage,
     refetch: query.refetch
   };
 };
