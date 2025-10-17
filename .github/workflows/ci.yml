@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  NODE_VERSION: "22.20.0"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint backend
+        run: npm run lint --workspace backend
+
+      - name: Build backend
+        run: npm run build --workspace backend
+
+      - name: Lint frontend
+        run: npm run lint --workspace frontend
+
+      - name: Build frontend
+        run: npm run build --workspace frontend
+
+      - name: Deploy to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        if: github.ref == 'refs/heads/main' && env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        run: |
+          npx netlify deploy --dir=apps/frontend/dist --prod --site $NETLIFY_SITE_ID
+
+      - name: Trigger Render deploy
+        if: github.ref == 'refs/heads/main' && env.RENDER_DEPLOY_HOOK != ''
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          curl -X POST "$RENDER_DEPLOY_HOOK"
