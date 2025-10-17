@@ -34,6 +34,8 @@ const renderAdditionalImages = (artwork: ArtworkDetail) => {
           <img
             key={url}
             src={url}
+            loading="lazy"
+            decoding="async"
             alt={`${artwork.title} additional view`}
             className="w-full rounded-lg border border-slate-200 object-cover dark:border-slate-700"
           />
@@ -115,6 +117,8 @@ export const ArtworkDetailPage = () => {
             <img
               src={data.primaryImage}
               alt={data.title}
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover"
             />
           ) : (

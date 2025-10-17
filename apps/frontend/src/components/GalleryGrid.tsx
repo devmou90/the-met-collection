@@ -53,6 +53,8 @@ export const GalleryGrid = ({ items, isLoading, error }: GalleryGridProps) => {
               <img
                 src={artwork.primaryImageSmall}
                 alt={artwork.title}
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
               />
             ) : (
