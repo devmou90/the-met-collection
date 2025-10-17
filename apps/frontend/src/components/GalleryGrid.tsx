@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { ArtworkDetail } from '../types/api';
 
 interface GalleryGridProps {
@@ -85,14 +86,22 @@ export const GalleryGrid = ({ items, isLoading, error }: GalleryGridProps) => {
                 </div>
               </dl>
             </div>
-            <a
-              href={artwork.objectURL}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-auto inline-flex items-center justify-center rounded-full border border-emerald-500 px-3 py-2 text-sm font-medium text-emerald-600 transition hover:bg-emerald-50 dark:border-emerald-400 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
-            >
-              View on The Met
-            </a>
+            <div className="mt-auto flex flex-wrap gap-2">
+              <Link
+                to={`/artworks/${artwork.objectID}`}
+                className="inline-flex flex-1 items-center justify-center rounded-full border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-emerald-400 hover:text-emerald-500 dark:border-slate-700 dark:text-slate-200 dark:hover:border-emerald-400"
+              >
+                View details
+              </Link>
+              <a
+                href={artwork.objectURL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex flex-1 items-center justify-center rounded-full border border-emerald-500 px-3 py-2 text-sm font-medium text-emerald-600 transition hover:bg-emerald-50 dark:border-emerald-400 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
+              >
+                View on The Met
+              </a>
+            </div>
           </div>
         </article>
       ))}
