@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getArtwork } from '../api/met';
 import type { ArtworkDetail } from '../types/api';
+import { useFavorites } from '../hooks/useFavorites';
 
 const DetailField = ({
   label,
@@ -49,6 +50,7 @@ export const ArtworkDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const objectId = Number(id);
   const isValidId = Number.isFinite(objectId) && objectId > 0;
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['artwork', objectId],
@@ -101,6 +103,11 @@ export const ArtworkDetailPage = () => {
       </main>
     );
   }
+
+  const isFavorited = isFavorite(data.objectID);
+  const handleToggleFavorite = () => {
+    toggleFavorite(data.objectID);
+  };
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16">
@@ -155,6 +162,33 @@ export const ArtworkDetailPage = () => {
           </dl>
 
           <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              aria-pressed={isFavorited}
+              onClick={handleToggleFavorite}
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 ${
+                isFavorited
+                  ? 'border-rose-500 bg-rose-50 text-rose-500 hover:bg-rose-100 dark:border-rose-400 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/20'
+                  : 'border-slate-200 text-slate-600 hover:border-emerald-400 hover:text-emerald-500 dark:border-slate-700 dark:text-slate-200 dark:hover:border-emerald-400'
+              }`}
+              title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-4 w-4"
+                fill={isFavorited ? 'currentColor' : 'none'}
+                stroke="currentColor"
+                strokeWidth={1.8}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12.001 20.727 4.708 13.43a5.25 5.25 0 0 1 7.425-7.425l-.132.132.001.002.124-.124a5.25 5.25 0 0 1 7.426 7.425l-7.551 7.287"
+                />
+              </svg>
+              <span>{isFavorited ? 'Favorited' : 'Add to favorites'}</span>
+            </button>
             <a
               href={data.objectURL}
               target="_blank"

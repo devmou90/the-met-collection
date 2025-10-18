@@ -1,3 +1,4 @@
+import { NavLink } from 'react-router-dom';
 import { useTheme } from '../theme/useTheme';
 
 const ThemeToggle = () => {
@@ -17,6 +18,13 @@ const ThemeToggle = () => {
 };
 
 export const Header = () => {
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition ${
+      isActive
+        ? 'bg-emerald-500 text-white shadow-sm dark:bg-emerald-400 dark:text-slate-900'
+        : 'text-slate-600 hover:text-emerald-500 dark:text-slate-300 dark:hover:text-emerald-300'
+    }`;
+
   return (
     <header className="sticky top-0 z-10 border-b border-slate-200/30 bg-slate-50/80 backdrop-blur dark:border-slate-800/60 dark:bg-slate-950/80">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
@@ -28,7 +36,17 @@ export const Header = () => {
             The Met Collection
           </span>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-4">
+          <nav className="flex items-center gap-2">
+            <NavLink to="/" className={navLinkClass} end>
+              Explore
+            </NavLink>
+            <NavLink to="/favorites" className={navLinkClass}>
+              Favorites
+            </NavLink>
+          </nav>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );
