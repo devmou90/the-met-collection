@@ -28,12 +28,10 @@ export const searchArtworks = async (
   );
 };
 
-// TODO
 export const getArtwork = async (id: number, signal?: AbortSignal) => {
   return request<ArtworkDetail>(`/objects/${id}`, { signal });
 };
 
-// TODO
 export const listDepartments = async (signal?: AbortSignal) => {
   return request<DepartmentResponse>('/departments', { signal });
 };
