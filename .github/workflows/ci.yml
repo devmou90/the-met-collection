@@ -27,11 +27,17 @@ jobs:
       - name: Lint backend
         run: npm run lint --workspace backend
 
+      - name: Test backend
+        run: npm test --workspace backend
+
       - name: Build backend
         run: npm run build --workspace backend
 
       - name: Lint frontend
         run: npm run lint --workspace frontend
+
+      - name: Test frontend
+        run: npm test --workspace frontend
 
       - name: Build frontend
         run: npm run build --workspace frontend
