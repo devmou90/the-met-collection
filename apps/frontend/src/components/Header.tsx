@@ -1,18 +1,48 @@
 import { NavLink } from 'react-router-dom';
+import { MoonIcon, SunIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../theme/useTheme';
 
 const ThemeToggle = () => {
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      aria-label={`Activate ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:border-emerald-500 hover:text-emerald-500 dark:border-slate-600 dark:text-slate-100 dark:hover:border-emerald-400"
+      role="switch"
+      aria-checked={isDark}
+      aria-label={`Activate ${isDark ? 'light' : 'dark'} mode`}
+      className="relative inline-flex h-9 w-16 items-center rounded-full border border-slate-300 bg-slate-100 transition hover:border-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 dark:border-slate-600 dark:bg-slate-800"
     >
-      <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
-      {theme === 'dark' ? 'Dark' : 'Light'} mode
+      <span
+        aria-hidden
+        className={`pointer-events-none flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm transition-transform dark:bg-slate-900 ${
+          isDark ? 'translate-x-7' : 'translate-x-1'
+        }`}
+      >
+        {isDark ? (
+          <MoonIcon className="h-4 w-4 text-slate-100" />
+        ) : (
+          <SunIcon className="h-4 w-4 text-amber-500" />
+        )}
+      </span>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-2 flex h-5 w-5 items-center justify-center text-slate-500 transition-opacity dark:text-slate-400"
+      >
+        <SunIcon
+          className={`h-4 w-4 ${isDark ? 'opacity-0' : 'opacity-100'}`}
+        />
+      </span>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute right-2 flex h-5 w-5 items-center justify-center text-slate-400 transition-opacity"
+      >
+        <MoonIcon
+          className={`h-4 w-4 ${isDark ? 'opacity-100' : 'opacity-0'}`}
+        />
+      </span>
     </button>
   );
 };
