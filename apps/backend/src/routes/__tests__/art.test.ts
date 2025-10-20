@@ -11,18 +11,16 @@ vi.mock('../../services/artworkService', () => ({
   getArtwork: vi.fn()
 }));
 
-vi.mock('../../clients/metClient', () => ({
-  metApi: {
-    listDepartments: vi.fn()
-  }
+vi.mock('../../services/departmentService', () => ({
+  getDepartments: vi.fn()
 }));
 
 const importRouterDeps = async () => {
   const searchService = await import('../../services/searchService');
   const artworkService = await import('../../services/artworkService');
-  const { metApi } = await import('../../clients/metClient');
+  const departmentService = await import('../../services/departmentService');
   const { artRouter } = await import('../art');
-  return { searchService, artworkService, metApi, artRouter };
+  return { searchService, artworkService, ...departmentService, artRouter };
 };
 
 const buildApp = async () => {
@@ -97,10 +95,10 @@ describe('art router', () => {
   });
 
   it('returns departments list', async () => {
-    const { metApi } = await importRouterDeps();
-    (
-      metApi.listDepartments as unknown as ReturnType<typeof vi.fn>
-    ).mockResolvedValue({ departments: [] });
+    const { getDepartments } = await importRouterDeps();
+    (getDepartments as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      departments: []
+    });
 
     const app = await buildApp();
 

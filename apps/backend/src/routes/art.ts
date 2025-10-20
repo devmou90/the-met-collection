@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { metApi } from '../clients/metClient';
 import { parseSearchParams, searchArtworks } from '../services/searchService';
 import { getArtwork } from '../services/artworkService';
+import { getDepartments } from '../services/departmentService';
 
 const router = Router();
 
@@ -39,7 +39,7 @@ router.get('/objects/:id', async (req, res, next) => {
 
 router.get('/departments', async (_req, res, next) => {
   try {
-    const departments = await metApi.listDepartments();
+    const departments = await getDepartments();
 
     res.json(departments);
   } catch (error) {
